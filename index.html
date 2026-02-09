@@ -28,7 +28,7 @@ body {
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 1s ease-in-out;
+  transition: transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55);
   position: relative;
 }
 
@@ -77,6 +77,7 @@ body {
   opacity: 0;
   margin-top: 20px;
   transition: opacity 1s ease;
+  position: relative;
 }
 
 button {
@@ -237,10 +238,10 @@ function createFloatingHeart() {
   setTimeout(() => heart.remove(), 3000);
 }
 
-// Card flip animation
+// Card flip with bounce
 setTimeout(() => {
   card.classList.add("open");
-  setTimeout(() => buttons.style.opacity = 1, 1000);
+  setTimeout(() => buttons.style.opacity = 1, 1200);
 }, 500);
 
 // No button behavior
@@ -256,14 +257,13 @@ noBtn.addEventListener("click", () => {
     noBtn.style.background = "linear-gradient(to right, #ff4d88, #ff85a2)";
   }, 300);
 
-  // Move button avoiding Yes
-  const maxAttempts = 100;
-  let attempt = 0, newX;
+  // Move button left/right only
+  const containerWidth = buttons.offsetWidth;
+  const noBtnWidth = noBtn.offsetWidth;
+  let newX;
   do {
-    newX = Math.random() * (buttons.offsetWidth - noBtn.offsetWidth);
-    attempt++;
-  } while (attempt < maxAttempts && Math.abs(newX - yesBtn.offsetLeft) < 60);
-
+    newX = Math.random() * (containerWidth - noBtnWidth);
+  } while (Math.abs(newX - yesBtn.offsetLeft) < 60);
   noBtn.style.left = newX + "px";
 
   // Grow Yes button
@@ -282,5 +282,6 @@ yesBtn.addEventListener("click", () => {
   }
 });
 </script>
+
 </body>
 </html>
