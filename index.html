@@ -135,17 +135,22 @@ button {
   top: 150px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 1.2rem;
+  font-size: 1.6rem; /* bigger */
   font-weight: bold;
   background: rgba(255,255,255,0.95);
   color: #ff2f6d;
-  padding: 12px 24px;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  padding: 16px 28px;
+  border-radius: 16px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.5s ease;
+  transition: all 0.4s ease;
   z-index: 5;
+}
+
+.message.animate {
+  transform: translateX(-50%) scale(1.2);
+  color: #ff85a2;
 }
 
 .floating-heart {
@@ -179,6 +184,7 @@ button {
   h1 { font-size: 1.3rem; }
   #yesBtn { left: 15%; }
   #noBtn { left: 55%; }
+  .message { font-size: 1.4rem; padding: 12px 20px; }
 }
 </style>
 </head>
@@ -215,8 +221,12 @@ let msgIndex = 0;
 
 function showMessage(text) {
   message.textContent = text;
+  message.classList.add("animate");
   message.style.opacity = 1;
-  setTimeout(() => { message.style.opacity = 0; }, 2500); // longer display
+  setTimeout(() => { 
+    message.style.opacity = 0;
+    message.classList.remove("animate");
+  }, 3000); // stays longer
 }
 
 function createFloatingHeart() {
@@ -231,6 +241,14 @@ noBtn.addEventListener("click", () => {
   // Show playful message
   showMessage(noMessages[msgIndex]);
   msgIndex = (msgIndex + 1) % noMessages.length;
+
+  // Button flash effect
+  noBtn.style.transform = "scale(1.2)";
+  noBtn.style.background = "linear-gradient(to right, #ffb6c1, #ff69b4)";
+  setTimeout(() => {
+    noBtn.style.transform = "";
+    noBtn.style.background = "linear-gradient(to right, #eee, #ccc)";
+  }, 300);
 
   // Move no button avoiding yes button
   const maxAttempts = 100;
