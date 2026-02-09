@@ -19,8 +19,8 @@ body {
 .container {
   perspective: 1200px;
   width: 90%;
-  max-width: 450px;
-  height: 350px;
+  max-width: 500px;
+  height: 380px;
   position: relative;
 }
 
@@ -73,40 +73,39 @@ body {
 .buttons {
   display: flex;
   justify-content: center;
-  gap: 20px;
   opacity: 0;
   margin-top: 20px;
   position: relative;
   transition: opacity 1s ease;
   width: 100%;
-  height: 80px;
+  height: 100px;
 }
 
 button {
-  padding: 14px 32px;
+  padding: 12px 28px;
   font-size: 1.2rem;
   border: none;
   border-radius: 16px;
   cursor: pointer;
   background: linear-gradient(to right, #ff4d88, #ff85a2);
   color: white;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.3);
   transition: all 0.3s ease;
   position: absolute;
 }
 
-#yesBtn { left: 50px; top: 20px; }
-#noBtn { right: 50px; top: 20px; }
+#yesBtn { left: 30%; top: 30px; min-width: 100px; }
+#noBtn { left: 60%; top: 30px; min-width: 100px; }
 
 #message {
   position: absolute;
-  top: 300px;
+  top: 320px;
   width: 100%;
   text-align: center;
   font-size: 1.6rem;
   font-weight: bold;
   color: #ff2f6d;
-  min-height: 40px;
+  min-height: 50px;
 }
 
 .popup {
@@ -161,10 +160,20 @@ button {
   100% { transform: translateY(-300px) rotate(-45deg); opacity: 0; }
 }
 
+.watermark {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.5);
+  font-style: italic;
+}
+
 @media (max-width: 700px) {
   .container { width: 95%; height: 300px; }
   .card-front, .card-back { font-size: 1.5rem; }
-  button { font-size: 1rem; padding: 12px 28px; }
+  button { font-size: 1rem; padding: 10px 24px; }
   #message { font-size: 1.3rem; top: 260px; }
 }
 </style>
@@ -183,10 +192,12 @@ button {
   </div>
 
   <div id="message"></div>
+  <div class="watermark">Made by: Ly ur bebe rorr &lt;3</div>
 </div>
 
 <div class="popup" id="popup">
   <div>YAYYY! iloveyousomuch bebe 🫶😚</div>
+  <div>Screenshot this and send this to me Ly 😁😁</div>
 </div>
 
 <script>
@@ -199,6 +210,7 @@ const popup = document.getElementById("popup");
 
 let yesSize = 18;
 let noMessages = [
+  "Are you sure?",
   "Nuuu, please 🥺",
   "Click Yes grrr 😡",
   "🥺🥺🥺",
@@ -232,7 +244,7 @@ noBtn.addEventListener("click", () => {
   showMessage(noMessages[msgIndex]);
   msgIndex = (msgIndex + 1) % noMessages.length;
 
-  // Effects
+  // Effects for No button
   noBtn.style.transform = "scale(1.3)";
   noBtn.style.background = "linear-gradient(to right, #ffb6c1, #ff69b4)";
   setTimeout(() => {
@@ -240,20 +252,29 @@ noBtn.addEventListener("click", () => {
     noBtn.style.background = "linear-gradient(to right, #ff4d88, #ff85a2)";
   }, 300);
 
+  // Effects for Yes button
+  yesBtn.style.transform = "scale(1.1)";
+  yesBtn.style.boxShadow = "0 0 20px #ff85a2, 0 0 30px #ff4d88";
+  setTimeout(() => { yesBtn.style.transform = ""; yesBtn.style.boxShadow = ""; }, 300);
+
   // Grow Yes button
   yesSize += 3;
   yesBtn.style.fontSize = yesSize + "px";
-  yesBtn.style.padding = (14 + yesSize/5) + "px " + (32 + yesSize/5) + "px";
+  yesBtn.style.padding = (12 + yesSize/5) + "px " + (28 + yesSize/5) + "px";
 
-  // Move No button randomly inside container
+  // Move No button randomly inside container without overlapping Yes
   const containerRect = buttons.getBoundingClientRect();
   const btnWidth = noBtn.offsetWidth;
   const btnHeight = noBtn.offsetHeight;
+  const yesRect = yesBtn.getBoundingClientRect();
 
-  const maxX = containerRect.width - btnWidth;
-  const maxY = containerRect.height - btnHeight;
-  const x = Math.random() * maxX;
-  const y = Math.random() * maxY;
+  let x, y, attempts = 0;
+  do {
+    x = Math.random() * (containerRect.width - btnWidth);
+    y = Math.random() * (containerRect.height - btnHeight);
+    attempts++;
+  } while ((x < yesRect.right - containerRect.left && x + btnWidth > yesRect.left - containerRect.left &&
+           y < yesRect.bottom - containerRect.top && y + btnHeight > yesRect.top - containerRect.top) && attempts < 100);
 
   noBtn.style.left = x + "px";
   noBtn.style.top = y + "px";
