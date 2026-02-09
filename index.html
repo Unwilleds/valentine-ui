@@ -5,37 +5,37 @@
 <title>Valentine UI</title>
 
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom, #ff6fa1, #ffd1dc);
+  background: linear-gradient(to bottom, #ff9aa2, #ffc3a0);
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  overflow: hidden;
 }
 
 .container {
   position: relative;
   width: 90%;
-  max-width: 420px;
-  height: 360px;
-  background: white;
-  border-radius: 18px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+  max-width: 450px;
+  height: 380px;
+  background: linear-gradient(to bottom right, #fff0f5, #ffe4f0);
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
   text-align: center;
   padding-top: 25px;
   overflow: hidden;
 }
 
 h1 {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   margin-bottom: 10px;
   color: #ff4d88;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.2);
 }
 
 .heart {
@@ -46,6 +46,7 @@ h1 {
   margin: 0 auto 15px;
   transform: rotate(-45deg);
   animation: pulse 1s infinite;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 .heart::before,
@@ -58,15 +59,8 @@ h1 {
   position: absolute;
 }
 
-.heart::before {
-  top: -30px;
-  left: 0;
-}
-
-.heart::after {
-  left: 30px;
-  top: 0;
-}
+.heart::before { top: -30px; left: 0; }
+.heart::after { left: 30px; top: 0; }
 
 @keyframes pulse {
   0% { transform: rotate(-45deg) scale(1); }
@@ -75,13 +69,15 @@ h1 {
 }
 
 button {
-  padding: 10px 22px;
+  padding: 10px 24px;
   font-size: 1rem;
   border: none;
   border-radius: 12px;
   cursor: pointer;
   position: absolute;
   animation: float 2s infinite;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  transition: all 0.3s ease;
 }
 
 @keyframes float {
@@ -92,15 +88,15 @@ button {
 
 #yesBtn {
   left: 20%;
-  top: 250px;
+  top: 260px;
   background: linear-gradient(to right, #ff4d88, #ff85a2);
   color: white;
 }
 
 #noBtn {
   left: 55%;
-  top: 250px;
-  background: #eee;
+  top: 260px;
+  background: linear-gradient(to right, #eee, #ccc);
   color: #444;
 }
 
@@ -112,13 +108,14 @@ button {
   justify-content: center;
   align-items: center;
   text-align: center;
-  border-radius: 18px;
+  border-radius: 20px;
   color: white;
   font-size: 1.4rem;
   padding: 20px;
   opacity: 0;
   pointer-events: none;
   animation: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 .popup.show {
@@ -131,6 +128,55 @@ button {
   0% { transform: scale(0.5); }
   100% { transform: scale(1); }
 }
+
+.message {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  background: rgba(255,255,255,0.9);
+  color: #ff2f6d;
+  padding: 8px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.floating-heart {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #ff4d88;
+  transform: rotate(-45deg);
+  animation: rise 3s linear forwards;
+}
+
+.floating-heart::before,
+.floating-heart::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background: #ff4d88;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.floating-heart::before { top: -10px; left: 0; }
+.floating-heart::after { left: 10px; top: 0; }
+
+@keyframes rise {
+  0% { transform: translateY(0) rotate(-45deg); opacity: 1; }
+  100% { transform: translateY(-250px) rotate(-45deg); opacity: 0; }
+}
+
+@media (max-width: 500px) {
+  h1 { font-size: 1.3rem; }
+  #yesBtn { left: 15%; }
+  #noBtn { left: 55%; }
+}
 </style>
 </head>
 
@@ -142,9 +188,8 @@ button {
   <button id="yesBtn">Yes</button>
   <button id="noBtn">No</button>
 
-  <div class="popup" id="popup">
-    Yay. You are my Valentine ❤️
-  </div>
+  <div class="popup" id="popup">YAYYY! iloveyousomuch bebe 🫶😚</div>
+  <div class="message" id="message"></div>
 </div>
 
 <script>
@@ -152,28 +197,71 @@ const noBtn = document.getElementById("noBtn");
 const yesBtn = document.getElementById("yesBtn");
 const container = document.querySelector(".container");
 const popup = document.getElementById("popup");
+const message = document.getElementById("message");
 
 let yesSize = 16;
+let noMessages = [
+  "Are you sure?",
+  "Nuuu, please 🥺",
+  "Click Yes grrr 😡",
+  "🥺🥺🥺",
+  "please 👉👈",
+  "okay, I'm not gonna stop until you click yes :D"
+];
+let msgIndex = 0;
+
+function showMessage(text) {
+  message.textContent = text;
+  message.style.opacity = 1;
+  setTimeout(() => { message.style.opacity = 0; }, 1500);
+}
+
+function createFloatingHeart() {
+  const heart = document.createElement("div");
+  heart.classList.add("floating-heart");
+  heart.style.left = Math.random() * 80 + "%";
+  container.appendChild(heart);
+  setTimeout(() => heart.remove(), 3000);
+}
 
 noBtn.addEventListener("click", () => {
-  const maxX = container.clientWidth - noBtn.offsetWidth;
-  const maxY = container.clientHeight - noBtn.offsetHeight;
+  // Show message
+  showMessage(noMessages[msgIndex]);
+  msgIndex = (msgIndex + 1) % noMessages.length;
 
-  const randomX = Math.floor(Math.random() * maxX);
-  const randomY = Math.floor(Math.random() * maxY);
+  // Move no button avoiding yes button
+  const maxAttempts = 100;
+  let attempt = 0;
+  let newX, newY;
+  do {
+    newX = Math.random() * (container.clientWidth - noBtn.offsetWidth);
+    newY = Math.random() * (container.clientHeight - noBtn.offsetHeight - 60) + 60; // avoid top
+    attempt++;
+  } while (attempt < maxAttempts && (
+    newX < yesBtn.offsetLeft + yesBtn.offsetWidth + 10 &&
+    newX + noBtn.offsetWidth > yesBtn.offsetLeft - 10 &&
+    newY < yesBtn.offsetTop + yesBtn.offsetHeight + 10 &&
+    newY + noBtn.offsetHeight > yesBtn.offsetTop - 10
+  ));
 
-  noBtn.style.left = randomX + "px";
-  noBtn.style.top = randomY + "px";
+  noBtn.style.left = newX + "px";
+  noBtn.style.top = newY + "px";
 
+  // Grow yes button
   yesSize += 3;
   yesBtn.style.fontSize = yesSize + "px";
-  yesBtn.style.padding = (10 + yesSize / 5) + "px " + (22 + yesSize / 5) + "px";
+  yesBtn.style.padding = (10 + yesSize/5) + "px " + (24 + yesSize/5) + "px";
 });
 
 yesBtn.addEventListener("click", () => {
   popup.classList.add("show");
   yesBtn.style.display = "none";
   noBtn.style.display = "none";
+
+  // floating hearts
+  for (let i = 0; i < 30; i++) {
+    setTimeout(createFloatingHeart, i * 100);
+  }
 });
 </script>
 
