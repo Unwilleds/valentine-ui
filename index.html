@@ -5,40 +5,38 @@
 <title>Valentine Card</title>
 
 <style>
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  margin: 0;
   font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom, #ff9aa2, #ffc3a0);
+  background: linear-gradient(to bottom, #ffb6c1, #ffc3a0);
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
   overflow: hidden;
 }
 
 .container {
+  perspective: 1200px;
+  width: 320px;
+  height: 220px;
   position: relative;
-  width: 300px;
-  height: 200px;
-  perspective: 1000px;
 }
 
 .card {
   width: 100%;
   height: 100%;
-  position: relative;
   transform-style: preserve-3d;
   transition: transform 1s ease-in-out;
+  position: relative;
 }
 
 .card.open {
-  transform: rotateY(180deg);
+  transform: rotateY(-180deg);
 }
 
-.card-front,
-.card-back {
+.card-front, .card-back {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -48,42 +46,50 @@ body {
   justify-content: center;
   align-items: center;
   color: white;
-  font-size: 1.3rem;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  font-size: 1.4rem;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
 }
 
 .card-front {
   background: linear-gradient(to bottom right, #ff4d88, #ff85a2);
 }
 
+.card-front::after {
+  content: "💌";
+  font-size: 2rem;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
 .card-back {
   background: linear-gradient(to bottom right, #ffdde1, #ffd1dc);
   color: #ff4d88;
   transform: rotateY(180deg);
-  font-size: 1.4rem;
   text-align: center;
   padding: 20px;
 }
 
 .buttons {
-  margin-top: 20px;
   display: flex;
   justify-content: center;
   gap: 20px;
   opacity: 0;
+  margin-top: 20px;
   transition: opacity 1s ease;
 }
 
 button {
-  padding: 10px 24px;
+  padding: 12px 28px;
   font-size: 1rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
   background: linear-gradient(to right, #ff4d88, #ff85a2);
   color: white;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
   transition: all 0.3s ease;
+  position: relative;
 }
 
 button:hover {
@@ -92,7 +98,7 @@ button:hover {
 
 .message {
   position: absolute;
-  top: 150px;
+  top: 250px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 1.6rem;
@@ -106,6 +112,36 @@ button:hover {
   pointer-events: none;
   transition: all 0.4s ease;
   z-index: 5;
+}
+
+.message.animate {
+  transform: translateX(-50%) scale(1.2);
+  color: #ff85a2;
+}
+
+.popup {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #ff4d88, #ffd1dc);
+  color: white;
+  font-size: 1.5rem;
+  text-align: center;
+  border-radius: 20px;
+  padding: 30px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+
+.popup.show {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .floating-heart {
@@ -134,19 +170,22 @@ button:hover {
   0% { transform: translateY(0) rotate(-45deg); opacity: 1; }
   100% { transform: translateY(-250px) rotate(-45deg); opacity: 0; }
 }
+
+@media (max-width: 500px) {
+  .container { width: 260px; height: 180px; }
+  .card-front, .card-back { font-size: 1.2rem; }
+  button { font-size: 0.95rem; padding: 10px 22px; }
+  .message { font-size: 1.4rem; padding: 12px 24px; top: 230px; }
+  .popup { font-size: 1.3rem; padding: 20px; }
+}
 </style>
 </head>
-
 <body>
 
 <div class="container">
   <div class="card" id="card">
-    <div class="card-front">
-      💌
-    </div>
-    <div class="card-back">
-      Can you be my Valentine?
-    </div>
+    <div class="card-front"></div>
+    <div class="card-back">Can you be my Valentine?</div>
   </div>
 
   <div class="buttons" id="buttons">
@@ -157,12 +196,17 @@ button:hover {
   <div class="message" id="message"></div>
 </div>
 
+<div class="popup" id="popup">
+  <div>YAYYY! iloveyousomuch bebe 🫶😚</div>
+</div>
+
 <script>
 const card = document.getElementById("card");
 const buttons = document.getElementById("buttons");
 const yesBtn = document.getElementById("yesBtn");
 const noBtn = document.getElementById("noBtn");
 const message = document.getElementById("message");
+const popup = document.getElementById("popup");
 
 let yesSize = 16;
 let noMessages = [
@@ -171,17 +215,17 @@ let noMessages = [
   "Click Yes grrr 😡",
   "🥺🥺🥺",
   "please 👉👈",
-  "okay, now I'm not gonna stop until you click yes :D"
+  "okay, im not gonna stop until you clicked yes"
 ];
 let msgIndex = 0;
 
 function showMessage(text) {
   message.textContent = text;
+  message.classList.add("animate");
   message.style.opacity = 1;
-  message.style.transform = "translateX(-50%) scale(1.2)";
   setTimeout(() => {
     message.style.opacity = 0;
-    message.style.transform = "translateX(-50%) scale(1)";
+    message.classList.remove("animate");
   }, 3000);
 }
 
@@ -193,12 +237,10 @@ function createFloatingHeart() {
   setTimeout(() => heart.remove(), 3000);
 }
 
-// Open card animation on load
+// Card flip animation
 setTimeout(() => {
   card.classList.add("open");
-  setTimeout(() => {
-    buttons.style.opacity = 1;
-  }, 1200);
+  setTimeout(() => buttons.style.opacity = 1, 1000);
 }, 500);
 
 // No button behavior
@@ -206,7 +248,7 @@ noBtn.addEventListener("click", () => {
   showMessage(noMessages[msgIndex]);
   msgIndex = (msgIndex + 1) % noMessages.length;
 
-  // Button flash effect
+  // Flash animation
   noBtn.style.transform = "scale(1.2)";
   noBtn.style.background = "linear-gradient(to right, #ffb6c1, #ff69b4)";
   setTimeout(() => {
@@ -214,30 +256,31 @@ noBtn.addEventListener("click", () => {
     noBtn.style.background = "linear-gradient(to right, #ff4d88, #ff85a2)";
   }, 300);
 
-  // Move no button randomly avoiding Yes button
+  // Move button avoiding Yes
   const maxAttempts = 100;
-  let attempt = 0;
-  let newX, newY;
+  let attempt = 0, newX;
   do {
     newX = Math.random() * (buttons.offsetWidth - noBtn.offsetWidth);
-    newY = Math.random() * 0; // no vertical move, keep same row
     attempt++;
   } while (attempt < maxAttempts && Math.abs(newX - yesBtn.offsetLeft) < 60);
 
   noBtn.style.left = newX + "px";
+
+  // Grow Yes button
+  yesSize += 3;
+  yesBtn.style.fontSize = yesSize + "px";
+  yesBtn.style.padding = (12 + yesSize/5) + "px " + (28 + yesSize/5) + "px";
 });
 
 // Yes button behavior
 yesBtn.addEventListener("click", () => {
-  message.textContent = "YAYYY! iloveyousomuch bebe 🫶😚";
-  message.style.opacity = 1;
   buttons.style.display = "none";
+  popup.classList.add("show");
 
   for (let i = 0; i < 30; i++) {
     setTimeout(createFloatingHeart, i * 100);
   }
 });
 </script>
-
 </body>
 </html>
